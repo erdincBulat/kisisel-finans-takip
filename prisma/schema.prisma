@@ -207,7 +207,10 @@ model Income {
  * (giden hareketlerin TAMAMI: EFT, Encard harcaması, ATM, kendi hesaplar
  * arası transfer, kredi kartı ödemesi, ...) hiç kaydedilmez — `Transaction`
  * tablosuna HİÇBİR ZAMAN yazılmaz, böylece /transactions ve dashboard'un
- * harcama tarafı bu veriden tamamen bağımsız kalır.
+ * harcama tarafı bu veriden tamamen bağımsız kalır. Bu verinin etkisi
+ * kullanıcı kararıyla /income sayfasıyla SINIRLIDIR — Dashboard'un hiçbir
+ * KPI'ı (Toplam Gelir dahil) bu Income satırlarını yansıtmaz, bkz.
+ * lib/analytics/monthly-summary.ts'teki `accountStatementId: null` filtresi.
  */
 model AccountStatement {
   id             String          @id @default(cuid())

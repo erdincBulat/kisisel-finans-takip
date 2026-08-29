@@ -6,7 +6,9 @@ import {
   listConfirmedSubscriptions,
   listInactiveSubscriptions,
   getMonthlyRecurringTotal,
+  withCurrentMonthAmounts,
 } from "@/lib/subscriptions/subscription.service";
+import { getLatestDataMonth } from "@/lib/analytics/monthly-summary";
 import { formatKurus } from "@/lib/money";
 import { SubscriptionsTable } from "@/components/subscriptions/subscriptions-table";
 import { SubscriptionActionButton } from "@/components/subscriptions/subscription-action-button";
@@ -15,13 +17,23 @@ import { confirmSubscriptionAction, setSubscriptionActiveAction } from "./action
 export default async function SubscriptionsPage() {
   await syncSubscriptions();
 
-  const [pending, confirmed, inactive] = await Promise.all([
+  const now = new Date();
+  const { year, month } = (await getLatestDataMonth()) ?? { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
+
+  const [pendingRaw, confirmedRaw, inactiveRaw] = await Promise.all([
     listPendingSubscriptions(),
     listConfirmedSubscriptions(),
     listInactiveSubscriptions(),
   ]);
 
-  const monthlyTotal = getMonthlyRecurringTotal(confirmed);
+  const [pending, confirmed, inactive] = await Promise.all([
+    withCurrentMonthAmounts(pendingRaw, year, month),
+    withCurrentMonthAmounts(confirmedRaw, year, month),
+    withCurrentMonthAmounts(inactiveRaw, year, month),
+  ]);
+
+  const monthlyTotal = getMonthlyRecurringTotal(confirmed.map((s) => ({ frequency: s.frequency, amount: s.currentAmount })));
+  const estimatedCount = confirmed.filter((s) => s.isEstimated).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,19 +41,23 @@ export default async function SubscriptionsPage() {
         <h1 className="text-2xl font-semibold">Abonelikler</h1>
         <p className="text-sm text-muted-foreground">
           Tekrar eden işlemlerden otomatik tespit edilen muhtemel abonelikler — onaylamadan aylık sabit gidere
-          dahil edilmez.
+          dahil edilmez. Tutarlar o ayın GERÇEK işlem tutarıdır (fatura zammı/değişken faturalarda ayları
+          karşılaştırabilesiniz diye), sabit bir ortalama değil.
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <RefreshCw className="size-4" /> Tahmini Aylık Sabit Gider
+            <RefreshCw className="size-4" /> Bu Ayki Abonelik/Fatura Toplamı
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-semibold">{formatKurus(monthlyTotal)}</p>
-          <p className="text-sm text-muted-foreground">{confirmed.length} onaylı abonelik (yıllık abonelikler dahil değil).</p>
+          <p className="text-sm text-muted-foreground">
+            {confirmed.length} onaylı abonelik (yıllık abonelikler dahil değil)
+            {estimatedCount > 0 ? `, ${estimatedCount} tanesi henüz faturalanmadı — tahmini` : ""}.
+          </p>
         </CardContent>
       </Card>
 

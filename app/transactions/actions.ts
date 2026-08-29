@@ -8,10 +8,12 @@ import {
   deleteTransaction,
   bulkUpdateCategory,
   updateCategoryByMerchant,
+  getTransactionById,
 } from "@/lib/db/transaction.service";
 import { transactionFormSchema } from "@/lib/validation/transaction.schema";
 import { normalizeMerchant } from "@/lib/merchants/normalize";
 import { upsertMerchantRule } from "@/lib/merchants/merchant-rule.service";
+import { setManualSubscription } from "@/lib/subscriptions/subscription.service";
 
 export async function createTransactionAction(
   _prev: ActionState,
@@ -75,6 +77,42 @@ export async function updateTransactionAction(
 
   revalidatePath("/transactions");
   return { status: "success", message: "İşlem güncellendi." };
+}
+
+/**
+ * Düzenleme diyaloğundaki "Abonelik olarak işaretle" onay kutusu (kullanıcı
+ * isteği): otomatik tespiti (`lib/subscriptions/detect.ts`) beklemeden bu
+ * işlemin merchant'ı için doğrudan onaylı bir `Subscription` oluşturur/
+ * günceller, ya da kutu kaldırılırsa pasifleştirir.
+ */
+export async function setTransactionSubscriptionAction(
+  id: string,
+  isSubscription: boolean,
+): Promise<ActionState> {
+  const transaction = await getTransactionById(id);
+  if (!transaction) {
+    return { status: "error", message: "İşlem bulunamadı." };
+  }
+
+  try {
+    await setManualSubscription({
+      merchant: transaction.normalizedMerchant,
+      active: isSubscription,
+      categoryId: transaction.categoryId,
+      amount: transaction.amount,
+      date: transaction.date,
+    });
+  } catch {
+    return { status: "error", message: "Abonelik durumu güncellenemedi." };
+  }
+
+  revalidatePath("/transactions");
+  revalidatePath("/subscriptions");
+  revalidatePath("/dashboard");
+  return {
+    status: "success",
+    message: isSubscription ? "İşlem abonelik olarak işaretlendi." : "Abonelik işareti kaldırıldı.",
+  };
 }
 
 export async function deleteTransactionAction(id: string): Promise<ActionState> {

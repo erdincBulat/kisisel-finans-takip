@@ -37,8 +37,11 @@ export type CreateAccountStatementInput = {
  * HARİÇ TUT olarak işaretlenen satırlar (giden hareketlerin TAMAMI dahil —
  * bkz. lib/bank-account/classify.ts) hiç kaydedilmez, `Transaction` tablosuna
  * HİÇBİR ZAMAN yazılmaz — /transactions ve dashboard'un harcama tarafı bu
- * veriden tamamen bağımsız kalır. `Income` zaten var olan modeldir, bu yüzden
- * dashboard'un "Toplam Gelir" KPI'ı ek bir değişiklik gerekmeden bu veriyi kapsar.
+ * veriden tamamen bağımsız kalır. `Income` zaten var olan modeldir; ama
+ * Dashboard'un "Toplam Gelir" KPI'ı (kullanıcı kararı) bu satırları
+ * YANSITMAZ — bkz. lib/analytics/monthly-summary.ts'teki
+ * `accountStatementId: null` filtresi. Bu veri yalnızca /income sayfasında
+ * görünür.
  */
 export function createAccountStatementWithLines(input: CreateAccountStatementInput) {
   return prisma.$transaction(async (tx) => {

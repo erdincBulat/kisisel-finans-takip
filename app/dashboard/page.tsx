@@ -13,7 +13,6 @@ import { CategoryDonut } from "@/components/dashboard/category-donut";
 import { CurrentDebtCard } from "@/components/dashboard/current-debt-card";
 import { UpcomingInstallmentsCard } from "@/components/dashboard/upcoming-installments-card";
 import { SubscriptionsSummaryCard } from "@/components/dashboard/subscriptions-summary-card";
-import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 
 function parseMonthParam(raw: string | undefined): { year: number; month: number } | null {
   if (!raw) return null;
@@ -46,13 +45,12 @@ export default async function DashboardPage(props: PageProps<"/dashboard">) {
       listCategoryTree(),
       getMonthlyTrend(selected.year, selected.month, 12),
       getUpcomingInstallmentsSummary(selected.year, selected.month),
-      getSubscriptionsSummary(),
+      getSubscriptionsSummary(selected.year, selected.month),
       listTransactions({ year: selected.year, month: selected.month }),
       getCurrentCardBalance(),
     ]);
 
   const expenseCategoryTree = categoryTree.filter((c) => !c.isIncome);
-  const selectedMonthParam = `${selected.year}-${String(selected.month).padStart(2, "0")}`;
 
   return (
     <div className="flex flex-col gap-6">
@@ -82,8 +80,6 @@ export default async function DashboardPage(props: PageProps<"/dashboard">) {
         <UpcomingInstallmentsCard summary={upcomingInstallments} />
         <SubscriptionsSummaryCard summary={subscriptions} />
       </div>
-
-      <RecentTransactions transactions={monthTransactions.slice(0, 8)} monthParam={selectedMonthParam} />
     </div>
   );
 }

@@ -12,7 +12,10 @@ export type MonthlySummary = {
  * Seçili ayın gelir/gider/net özeti (spec §28/§51/§52):
  * - Harcama: EXPENSE toplamı - REFUND toplamı. PAYMENT hariç (kredi kartı borç
  *   ödemesidir, harcama değildir — bkz. CLAUDE.md TransactionType.PAYMENT notu).
- * - Gelir: Income tablosu + (varsa) INCOME tipli transaction'lar.
+ * - Gelir: Income tablosu (yalnızca MANUEL girilenler, `accountStatementId: null`)
+ *   + (varsa) INCOME tipli transaction'lar. Hesap özeti (vadesiz hesap PDF'i)
+ *   kaynaklı Income satırları kasıtlı olarak HARİÇ — kullanıcı kararı: o veri
+ *   yalnızca /income sayfasında görünür, Dashboard'un hiçbir KPI'ını etkilemez.
  * - Ay, `getEffectiveMonth`'a göre belirlenir (bkz. lib/db/transaction.service.ts)
  *   — normal işlemlerde bu işlem tarihidir, ekstre kaynaklı taksitli işlemlerde
  *   ekstrenin ait olduğu dönemdir (spec §53).
@@ -25,7 +28,10 @@ export async function getMonthlySummary(year: number, month: number): Promise<Mo
     prisma.transaction.aggregate({ where: { ...monthFilter, type: "REFUND" }, _sum: { amount: true } }),
     prisma.transaction.aggregate({ where: { ...monthFilter, type: "INCOME" }, _sum: { amount: true } }),
     prisma.income.aggregate({
-      where: { date: { gte: new Date(Date.UTC(year, month - 1, 1)), lt: new Date(Date.UTC(year, month, 1)) } },
+      where: {
+        accountStatementId: null,
+        date: { gte: new Date(Date.UTC(year, month - 1, 1)), lt: new Date(Date.UTC(year, month, 1)) },
+      },
       _sum: { amount: true },
     }),
     prisma.transaction.count({ where: monthFilter }),
@@ -101,7 +107,10 @@ export async function getMonthlyTrend(endYear: number, endMonth: number, count: 
         statement: { select: { year: true, month: true } },
       },
     }),
-    prisma.income.findMany({ where: { date: { gte: rangeStart, lt: rangeEnd } }, select: { date: true, amount: true } }),
+    prisma.income.findMany({
+      where: { accountStatementId: null, date: { gte: rangeStart, lt: rangeEnd } },
+      select: { date: true, amount: true },
+    }),
   ]);
 
   function apply(amount: number, type: string, year: number, month: number) {

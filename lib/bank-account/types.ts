@@ -6,7 +6,9 @@
  * eder. Giden hareketler (EFT, Encard harcaması, ATM vb.) önizlemede
  * GÖRÜNÜR (bakiye zincirini doğrulamak ve kullanıcının "evet, tüm çıkışları
  * tanıyorum" diyebilmesi için) ama her zaman HARİÇ TUT olarak işaretlenir —
- * kaydedilmezler.
+ * kaydedilmezler. Ayrıca kullanıcı kararıyla bu verinin etkisi /income
+ * sayfasıyla SINIRLIDIR — Dashboard'un hiçbir KPI'ı hesap özeti kaynaklı
+ * Income satırlarını yansıtmaz (bkz. lib/analytics/monthly-summary.ts).
  */
 export type AccountLineClassification = "INCOME" | "EXCLUDED";
 

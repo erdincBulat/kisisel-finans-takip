@@ -24,7 +24,9 @@ export function SubscriptionsSummaryCard({ summary }: { summary: SubscriptionsSu
           <>
             <p className="text-2xl font-semibold">{formatKurus(summary.monthlyTotal)}</p>
             <p className="text-sm text-muted-foreground">
-              Tahmini aylık sabit gider ({summary.items.length} abonelik).{" "}
+              Bu ayki abonelik/fatura toplamı ({summary.items.length} abonelik
+              {summary.estimatedCount > 0 ? `, ${summary.estimatedCount} tanesi henüz faturalanmadı — tahmini` : ""}
+              ).{" "}
               <Link href="/subscriptions" className="hover:underline">
                 Detaylar
               </Link>

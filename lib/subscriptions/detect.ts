@@ -44,7 +44,7 @@ function frequencyOfGap(days: number): SubscriptionFrequency | null {
   return null;
 }
 
-function addInterval(date: Date, frequency: SubscriptionFrequency): Date {
+export function addInterval(date: Date, frequency: SubscriptionFrequency): Date {
   const result = new Date(date);
   result.setUTCMonth(result.getUTCMonth() + (frequency === "MONTHLY" ? 1 : 12));
   return result;

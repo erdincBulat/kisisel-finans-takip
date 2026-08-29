@@ -3,7 +3,7 @@ import type { Subscription } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatKurus } from "@/lib/money";
-import type { SubscriptionWithCategory } from "@/lib/subscriptions/subscription.service";
+import type { SubscriptionWithCurrentAmount } from "@/lib/subscriptions/subscription.service";
 
 const dateFormatter = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -18,9 +18,9 @@ export function SubscriptionsTable({
   emptyMessage,
   renderActions,
 }: {
-  subscriptions: SubscriptionWithCategory[];
+  subscriptions: SubscriptionWithCurrentAmount[];
   emptyMessage: string;
-  renderActions: (subscription: SubscriptionWithCategory) => ReactNode;
+  renderActions: (subscription: SubscriptionWithCurrentAmount) => ReactNode;
 }) {
   if (subscriptions.length === 0) {
     return (
@@ -38,7 +38,7 @@ export function SubscriptionsTable({
             <TableHead>Merchant</TableHead>
             <TableHead>Kategori</TableHead>
             <TableHead>Sıklık</TableHead>
-            <TableHead className="text-right">Ortalama Tutar</TableHead>
+            <TableHead className="text-right">Bu Ay</TableHead>
             <TableHead>Son Ödeme</TableHead>
             <TableHead>Sıradaki Ödeme</TableHead>
             <TableHead className="w-px" />
@@ -63,7 +63,17 @@ export function SubscriptionsTable({
               <TableCell>
                 <Badge variant="secondary">{frequencyLabel[subscription.frequency]}</Badge>
               </TableCell>
-              <TableCell className="text-right">{formatKurus(subscription.averageAmount)}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex flex-col items-end">
+                  <span className={subscription.isEstimated ? "text-muted-foreground" : "font-medium"}>
+                    {formatKurus(subscription.currentAmount)}
+                    {subscription.isEstimated && <span className="ml-1 text-xs">(tahmini)</span>}
+                  </span>
+                  {subscription.currentAmount !== subscription.averageAmount && (
+                    <span className="text-xs text-muted-foreground">Ort: {formatKurus(subscription.averageAmount)}</span>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="text-muted-foreground">{dateFormatter.format(subscription.lastChargeDate)}</TableCell>
               <TableCell className="text-muted-foreground">{dateFormatter.format(subscription.nextExpectedDate)}</TableCell>
               <TableCell>

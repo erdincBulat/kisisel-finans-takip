@@ -186,17 +186,31 @@ Kullanıcı `docs/` altına 6 aylık gerçek Enpara **hesap özeti** (vadesiz TL
 
 ---
 
-## ⬜ Faz 10 — Bütçe
+## ✅ Faz 10 — Bütçe (tamamlandı)
 
-- [ ] `lib/budgets/budget.service.ts`
-- [ ] `/budgets` — kategori limitleri CRUD, ilerleme çubukları, aşım uyarısı
+- [x] `lib/db/budget.service.ts` — `createBudget`/`updateBudget` (aynı kategori+alt kategori kombinasyonu için ikinci bütçeyi engeller, `BudgetDuplicateError`), `deleteBudget`, `computeBudgetProgress` (saf çekirdek — `buildInstallmentPlans`/`detectSubscriptions` ile aynı DB'den bağımsız test edilebilirlik ayrımı) + `listBudgetsWithProgress` (DB sarmalayıcı, tek sorgu — spec §56)
+- [x] `lib/validation/budget.schema.ts` — zod şeması, `moneyField`/`optionalId` paylaşılan alanları yeniden kullanılıyor
+- [x] `/budgets` — "Yeni Bütçe" formu (ana kategori + opsiyonel alt kategori, `TransactionFormDialog` ile aynı basamaklı select deseni), her bütçe için ilerleme çubuğu (`%80` üzeri turuncu, aşımda kırmızı + "Bütçe aşıldı" rozeti), düzenle/sil (generic `ConfirmDeleteButton`)
+- [x] Bütçe hesabı ana kategoride (subCategoryId: null) o kategorinin TÜM harcamasını (alt kategoriler dahil) kapsar, alt kategori bazlı bütçe yalnızca o alt kategoriyi sayar — `Transaction.categoryId`'nin her zaman ana kategoriyi taşıması sayesinde (bkz. CLAUDE.md) ekstra bir toplama adımına gerek kalmadı
+- [x] Ay eşleşmesi `transactionMonthFilter` ile yapılıyor (taksitli ekstre satırları için ekstre dönemi esas alınır, spec §53) — sayfa varsayılan olarak `getLatestDataMonth()`'u kullanıyor, ayrı bir ay navigasyonu yok (kapsam kullanıcıyla netleştirildi, bkz. aşağı)
+- [x] `components/ui/progress.tsx` — Base UI `Progress` primitive'i shadcn CLI ile eklendi (`base-nova` stiliyle uyumlu); aşım rengini satır bazlı değiştirebilmek için sayfa `ProgressPrimitive.Root`'u doğrudan, `ProgressTrack`/`ProgressIndicator` alt bileşenlerini elle kompoze ediyor (üretilen `Progress` sarmalayıcısı kendi track/indicator'ını sabit renkle zorunlu kıldığı için)
+- [x] 5 yeni test (`tests/budgets/progress.test.ts`) — ana/alt kategori ayrımı, REFUND düşümü, aşım, negatif net iadenin 0'a kırpılması, boş işlem seti. Toplam test sayısı 137 → 142
+- [x] Playwright ile gerçek tarayıcıda uçtan uca doğrulandı: bütçe oluştur → aynı kategoriye ikinci bütçe denemesi doğru hata mesajıyla engellendi ("Bu kategori için zaten bir bütçe tanımlı. Mevcut bütçeyi düzenleyin.") → limiti düşürüp güncelleyince "Bütçe aşıldı" rozeti + kırmızı ilerleme çubuğu (%100'de kırpılmış bar, gerçek %9800 metni) doğru göründü → silindi, DB temiz bırakıldı, konsolda gerçek bir hata yoktu (yalnızca Faz 3'te belgelenen zararsız Base UI dev-uyarısı)
+
+**Kapsam kararı (kullanıcıyla netleştirildi):** spec §36 "Dashboard'da gösterilmelidir" ifadesine rağmen, kullanıcı Dashboard'u sade tutmak istediğini belirtti (bu fazdan hemen önce Son İşlemler bölümünü kaldırmıştı) — bütçe ilerlemesi yalnızca `/budgets` sayfasında gösteriliyor, Dashboard'a ayrı bir özet kartı eklenmedi.
 
 ---
 
-## ⬜ Faz 11 — Raporlar
+## ✅ Faz 11 — Raporlar (tamamlandı)
 
-- [ ] `/reports` — aylık karşılaştırma, kategori trend, top merchant, taksit yükü, gelir/gider
-- [ ] `/history` — yıl bazlı aylık özet, aya tıklayınca o ayın dashboard'u
+- [x] `lib/analytics/top-merchants.ts` — `getTopMerchants` (seçili ayda net EXPENSE-REFUND'a göre en çok harcanan merchant'lar, spec §55)
+- [x] `lib/analytics/category-trend.ts` — `getCategoryTrend` (son N ayda en çok harcanan topN ana kategorinin ay bazlı serisi) — `getMonthlyTrend` ile AYNI iki-sorgulu desen (normal işlemler tarih aralığına göre + ekstre kaynaklı taksitli işlemler `getEffectiveMonth`'a göre kovaya dağıtılır), tek ay değil zaman serisi göstermesi dashboard'un `getCategoryBreakdown`'ından farkı
+- [x] `/reports` — ay navigasyonu (`MonthNav`, dashboard'la aynı bileşen), Gelir/Gider grafiği (yeni `IncomeExpenseTrendChart`), Kategori Trendi (yeni `CategoryTrendChart`, yığılmış bar), En Çok Harcama Yapılan Merchant'lar (yeni `TopMerchantsList`), Gelecek Taksit Yükü + Aylık Abonelikler (Faz 8/9'un `UpcomingBurdenChart`/`SubscriptionsSummaryCard` bileşenleri AYNEN yeniden kullanıldı — spec §55'in bu iki maddesi zaten var olan verilerle karşılanıyor), Aylık Karşılaştırma tablosu (yeni `MonthlyComparisonTable`, gelir/gider/net + bir önceki aya göre %değişim)
+- [x] `/history` — yıl navigasyonu (yeni `YearNav`), `getMonthlyTrend(year, 12, 12)` ile tek sorguda yılın 12 ayı, her satır `/dashboard?month=YYYY-MM`'a link (spec §32 birebir mockup formatı: ay adı + tutar, ek olarak küçük "Net" bilgisi)
+- [x] Yeni analytics fonksiyonları (`monthly-summary.ts`/`category-breakdown.ts` ile aynı) kasıtlı olarak ayrı unit test almadı — bu dosyalar da hiç test edilmiyor, doğrulama gerçek 6 aylık veriyle tarayıcıda yapılıyor (proje kuralı: sadece gerçekten algoritmik karmaşıklığı olan çekirdekler — `schedule.ts`/`detect.ts`/Faz 10'un `computeBudgetProgress`'i — saf fonksiyona ayrılıp test ediliyor)
+- [x] Playwright ile gerçek tarayıcıda uçtan uca doğrulandı (kullanıcının gerçek verisiyle, Temmuz 2026 seçili): tüm 6 bölüm doğru render oldu (Gelir/Gider, Kategori Trendi, Top Merchant'lar, Taksit Yükü, Abonelikler, Aylık Karşılaştırma), `/history`'de 12 ay listelendi ve bir aya tıklamak doğru `?month=` parametresiyle `/dashboard`'a yönlendirdi, konsolda hata yoktu
+
+**Kapsam notu — Dashboard'daki Bank Account gelir hariç tutma kuralının Reports'a da yansıması:** `getMonthlyTrend`/`getMonthlySummary` zaten hesap özeti kaynaklı `Income` satırlarını hariç tutuyor (önceki oturumda kullanıcı isteğiyle eklendi — bkz. "hesap özeti sadece /income'da kalsın" kararı). `/reports`'un Gelir/Gider grafiği bu paylaşılan fonksiyonları kullandığı için otomatik olarak aynı kuralı miras aldı — bu istenen davranış: kullanıcının "sadece gelir kısmında kalsın" talebi Dashboard'a özel değil, genel bir kısıtlamaydı.
 
 ---
 

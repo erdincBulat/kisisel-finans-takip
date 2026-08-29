@@ -1,6 +1,6 @@
 import type { Category, Subscription } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
-import { detectSubscriptions, type SubscriptionCandidate } from "./detect";
+import { addInterval, detectSubscriptions, type SubscriptionCandidate } from "./detect";
 
 /**
  * Abonelik tespiti için aday işlemler: taksitli olmayan gider işlemleri.
@@ -98,7 +98,121 @@ export function setSubscriptionActive(id: string, active: boolean) {
   return prisma.subscription.update({ where: { id }, data: { active } });
 }
 
+/**
+ * `/transactions` sayfasının, her satırın "Abonelik" onay kutusunu doğru
+ * başlangıç durumuyla göstermesi için tek seferde çektiği merchant seti
+ * (N+1 sorgu yerine — spec §56).
+ */
+export async function listActiveConfirmedSubscriptionMerchants(): Promise<string[]> {
+  const rows = await prisma.subscription.findMany({
+    where: { confirmed: true, active: true },
+    select: { merchant: true },
+  });
+  return rows.map((r) => r.merchant);
+}
+
+export type SetManualSubscriptionInput = {
+  merchant: string;
+  active: boolean;
+  categoryId: string | null;
+  amount: number; // kuruş
+  date: Date;
+};
+
+/**
+ * `/transactions` düzenleme diyaloğundaki "Abonelik olarak işaretle"
+ * onay kutusu için: otomatik tespit (`detectSubscriptions`) beklemeden
+ * kullanıcının doğrudan onayladığı bir abonelik oluşturur/günceller
+ * (`confirmed: true`, `syncSubscriptions`'daki find-then-create/update
+ * kalıbıyla aynı — `merchant` alanında DB seviyesinde unique yok). Kutunun
+ * işareti kaldırılırsa kayıt SİLİNMEZ, `active: false` yapılır — diğer
+ * abonelik pasifleştirme akışlarıyla (setSubscriptionActive) aynı, geri
+ * alınabilir davranış.
+ */
+export async function setManualSubscription(input: SetManualSubscriptionInput): Promise<void> {
+  const existing = await prisma.subscription.findFirst({ where: { merchant: input.merchant } });
+
+  if (!input.active) {
+    if (existing) await prisma.subscription.update({ where: { id: existing.id }, data: { active: false } });
+    return;
+  }
+
+  const frequency = existing?.frequency ?? "MONTHLY";
+  const data = {
+    averageAmount: input.amount,
+    frequency,
+    lastChargeDate: input.date,
+    nextExpectedDate: addInterval(input.date, frequency === "YEARLY" ? "YEARLY" : "MONTHLY"),
+    categoryId: input.categoryId,
+    active: true,
+    confirmed: true,
+  };
+
+  if (existing) {
+    await prisma.subscription.update({ where: { id: existing.id }, data });
+  } else {
+    await prisma.subscription.create({ data: { merchant: input.merchant, ...data } });
+  }
+}
+
 /** Tahmini aylık sabit gider (spec §27) — yıllık abonelikler bu toplama dahil edilmez. */
-export function getMonthlyRecurringTotal(subscriptions: Subscription[]): number {
-  return subscriptions.filter((s) => s.frequency !== "YEARLY").reduce((sum, s) => sum + s.averageAmount, 0);
+export function getMonthlyRecurringTotal(items: { frequency: Subscription["frequency"]; amount: number }[]): number {
+  return items.filter((i) => i.frequency !== "YEARLY").reduce((sum, i) => sum + i.amount, 0);
+}
+
+/**
+ * Bir merchant listesinin, verilen ay için GERÇEK toplam harcaması (kullanıcı
+ * isteği: faturalar/abonelikler ay ay farklı tutarlarda gelebiliyor — fatura
+ * zammı ya da değişken tutarlı faturalar (elektrik/su/doğalgaz gibi) — bu
+ * yüzden `Subscription.averageAmount` tek başına yanıltıcı, gerçek o ayki
+ * işlem tutarı kullanılmalı). Aynı merchant'a o ay birden fazla işlem
+ * düşerse (nadir ama mümkün) toplanır.
+ */
+async function getActualMonthlyAmounts(
+  merchants: string[],
+  year: number,
+  month: number,
+): Promise<Map<string, number>> {
+  if (merchants.length === 0) return new Map();
+
+  const rows = await prisma.transaction.groupBy({
+    by: ["normalizedMerchant"],
+    where: {
+      normalizedMerchant: { in: merchants },
+      type: "EXPENSE",
+      date: { gte: new Date(Date.UTC(year, month - 1, 1)), lt: new Date(Date.UTC(year, month, 1)) },
+    },
+    _sum: { amount: true },
+  });
+
+  return new Map(rows.map((r) => [r.normalizedMerchant, r._sum.amount ?? 0]));
+}
+
+export type SubscriptionWithCurrentAmount = SubscriptionWithCategory & {
+  currentAmount: number; // kuruş — o ayki gerçek işlem tutarı, yoksa averageAmount'a düşer
+  isEstimated: boolean; // true: o ay için henüz gerçek işlem yok, averageAmount tahmini olarak kullanıldı
+};
+
+/**
+ * Her abonelik için verilen aydaki GERÇEK tutarı ekler (bkz.
+ * `getActualMonthlyAmounts`). O ay için henüz bir işlem yoksa (fatura henüz
+ * gelmedi/işlenmedi) `averageAmount` tahmini olarak kullanılır ve
+ * `isEstimated: true` ile işaretlenir — "asla sessizce varsayma" ilkesi
+ * (spec §70 Kural 7), UI bunu ayırt edip gösterebilsin diye.
+ */
+export async function withCurrentMonthAmounts(
+  subscriptions: SubscriptionWithCategory[],
+  year: number,
+  month: number,
+): Promise<SubscriptionWithCurrentAmount[]> {
+  const actualByMerchant = await getActualMonthlyAmounts(
+    subscriptions.map((s) => s.merchant),
+    year,
+    month,
+  );
+
+  return subscriptions.map((s) => {
+    const actual = actualByMerchant.get(s.merchant);
+    return { ...s, currentAmount: actual ?? s.averageAmount, isEstimated: actual === undefined };
+  });
 }

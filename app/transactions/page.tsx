@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { listTransactions } from "@/lib/db/transaction.service";
 import { listCategoryTree } from "@/lib/db/category.service";
+import { listActiveConfirmedSubscriptionMerchants } from "@/lib/subscriptions/subscription.service";
 import { TransactionsFilters } from "@/components/transactions/transactions-filters";
 import { TransactionsTable } from "@/components/transactions/transactions-table";
 import { TransactionFormDialog } from "@/components/transactions/transaction-form-dialog";
@@ -11,7 +12,7 @@ export default async function TransactionsPage(props: PageProps<"/transactions">
   const monthParam = typeof searchParams.month === "string" ? searchParams.month : undefined;
   const [year, month] = monthParam ? monthParam.split("-").map(Number) : [undefined, undefined];
 
-  const [transactions, categoryTree] = await Promise.all([
+  const [transactions, categoryTree, subscribedMerchants] = await Promise.all([
     listTransactions({
       year,
       month,
@@ -24,6 +25,7 @@ export default async function TransactionsPage(props: PageProps<"/transactions">
       search: typeof searchParams.q === "string" ? searchParams.q : undefined,
     }),
     listCategoryTree(),
+    listActiveConfirmedSubscriptionMerchants(),
   ]);
 
   const expenseCategories = categoryTree.filter((c) => !c.isIncome);
@@ -49,7 +51,11 @@ export default async function TransactionsPage(props: PageProps<"/transactions">
       </div>
 
       <TransactionsFilters categories={expenseCategories} />
-      <TransactionsTable transactions={transactions} categories={expenseCategories} />
+      <TransactionsTable
+        transactions={transactions}
+        categories={expenseCategories}
+        subscribedMerchants={subscribedMerchants}
+      />
     </div>
   );
 }

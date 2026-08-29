@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Category, Transaction } from "@prisma/client";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,11 +30,14 @@ const SOURCE_LABEL: Record<string, string> = { MANUAL: "Manuel", STATEMENT: "Eks
 export function TransactionsTable({
   transactions,
   categories,
+  subscribedMerchants,
 }: {
   transactions: TransactionRow[];
   categories: CategoryWithChildren[];
+  subscribedMerchants: string[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const subscribedMerchantSet = useMemo(() => new Set(subscribedMerchants), [subscribedMerchants]);
 
   if (transactions.length === 0) {
     return (
@@ -139,6 +142,7 @@ export function TransactionsTable({
                         installmentCurrent: tx.installmentCurrent,
                         installmentTotal: tx.installmentTotal,
                         notes: tx.notes,
+                        isSubscription: subscribedMerchantSet.has(tx.normalizedMerchant),
                       }}
                       trigger={
                         <Button variant="ghost" size="icon-sm">

@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +29,7 @@ import {
   applyCategoryToMerchantAction,
   createMerchantRuleAction,
   createTransactionAction,
+  setTransactionSubscriptionAction,
   updateTransactionAction,
 } from "@/app/transactions/actions";
 
@@ -51,6 +53,7 @@ export type TransactionDefaultValues = {
   installmentCurrent: number | null;
   installmentTotal: number | null;
   notes: string | null;
+  isSubscription: boolean;
 };
 
 type TransactionFormDialogProps = {
@@ -70,6 +73,7 @@ export function TransactionFormDialog({
   const [type, setType] = useState<TransactionType>(transaction?.type ?? "EXPENSE");
   const [categoryId, setCategoryId] = useState(transaction?.categoryId ?? "");
   const [subCategoryId, setSubCategoryId] = useState(transaction?.subCategoryId ?? "");
+  const [isSubscription, setIsSubscription] = useState(transaction?.isSubscription ?? false);
   const isEdit = Boolean(transaction);
 
   // Dialog açıldığı andaki transaction'ın anlık görüntüsü. `transaction` prop'u
@@ -94,6 +98,11 @@ export function TransactionFormDialog({
   useActionToast(state, () => {
     setOpen(false);
     const original = openedWithRef.current;
+
+    if (isEdit && original && (isSubscription || original.isSubscription)) {
+      void setTransactionSubscriptionAction(original.id, isSubscription);
+    }
+
     if (!isEdit || !original || !categoryId) return;
 
     const categoryChanged = categoryId !== (original.categoryId ?? "");
@@ -119,6 +128,7 @@ export function TransactionFormDialog({
           setType(transaction?.type ?? "EXPENSE");
           setCategoryId(transaction?.categoryId ?? "");
           setSubCategoryId(transaction?.subCategoryId ?? "");
+          setIsSubscription(transaction?.isSubscription ?? false);
         }
       }}
     >
@@ -251,6 +261,19 @@ export function TransactionFormDialog({
             <Label htmlFor="notes">Not (opsiyonel)</Label>
             <Textarea id="notes" name="notes" defaultValue={transaction?.notes ?? undefined} rows={2} />
           </div>
+
+          {isEdit && (
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isSubscription"
+                checked={isSubscription}
+                onCheckedChange={(checked) => setIsSubscription(checked === true)}
+              />
+              <Label htmlFor="isSubscription" className="font-normal">
+                Bu işlemi abonelik olarak işaretle
+              </Label>
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="submit" disabled={pending}>
