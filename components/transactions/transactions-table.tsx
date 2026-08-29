@@ -81,6 +81,7 @@ export function TransactionsTable({
               </TableHead>
               <TableHead>Tarih</TableHead>
               <TableHead>Açıklama</TableHead>
+              <TableHead>Merchant</TableHead>
               <TableHead>Kategori</TableHead>
               <TableHead>Taksit</TableHead>
               <TableHead>Kaynak</TableHead>
@@ -101,6 +102,7 @@ export function TransactionsTable({
                   </TableCell>
                   <TableCell className="text-muted-foreground">{dateFormatter.format(tx.date)}</TableCell>
                 <TableCell className="max-w-64 truncate font-medium">{tx.description}</TableCell>
+                <TableCell className="max-w-40 truncate text-muted-foreground">{tx.normalizedMerchant}</TableCell>
                 <TableCell>
                   {category ? (
                     <Badge

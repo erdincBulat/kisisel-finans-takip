@@ -10,6 +10,18 @@ export function getAccountStatementByPeriod(year: number, month: number) {
   return prisma.accountStatement.findUnique({ where: { year_month: { year, month } } });
 }
 
+/**
+ * Yanlış PDF yüklendiğinde geri alma yolu — `deleteStatement`'ın (statement.service.ts)
+ * hesap özeti karşılığı: bu ekstreden gelen TÜM `Income` satırları da siliniyor,
+ * yalnızca `accountStatementId`'yi null'a çekmek yeterli değil.
+ */
+export function deleteAccountStatement(id: string) {
+  return prisma.$transaction([
+    prisma.income.deleteMany({ where: { accountStatementId: id } }),
+    prisma.accountStatement.delete({ where: { id } }),
+  ]);
+}
+
 export type CreateAccountLineInput = {
   date: Date;
   description: string;

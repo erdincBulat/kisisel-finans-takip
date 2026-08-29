@@ -21,6 +21,10 @@ export default async function TransactionsPage(props: PageProps<"/transactions">
         searchParams.type === "EXPENSE" || searchParams.type === "REFUND"
           ? searchParams.type
           : undefined,
+      source:
+        searchParams.source === "MANUAL" || searchParams.source === "STATEMENT"
+          ? searchParams.source
+          : undefined,
       onlyInstallments: searchParams.onlyInstallments === "1",
       search: typeof searchParams.q === "string" ? searchParams.q : undefined,
     }),

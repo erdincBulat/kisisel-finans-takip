@@ -1,9 +1,26 @@
+import { History } from "lucide-react";
+import { listStatements } from "@/lib/db/statement.service";
 import { getMonthlyTrend, getLatestDataMonth } from "@/lib/analytics/monthly-summary";
+import { PageEmptyState } from "@/components/shared/page-empty-state";
 import { YearNav } from "@/components/history/year-nav";
 import { YearlySummaryList } from "@/components/history/yearly-summary-list";
 
 export default async function HistoryPage(props: PageProps<"/history">) {
   const searchParams = await props.searchParams;
+
+  const statements = await listStatements();
+  if (statements.length === 0) {
+    return (
+      <PageEmptyState
+        icon={History}
+        title="Henüz geçmiş veri yok."
+        description="Yıl bazlı aylık özetleri görmek için önce bir ekstre yükleyin."
+        ctaHref="/statements"
+        ctaLabel="Ekstre Yükle"
+      />
+    );
+  }
+
   const now = new Date();
   const latest = (await getLatestDataMonth()) ?? { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
 

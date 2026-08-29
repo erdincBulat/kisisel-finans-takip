@@ -65,6 +65,23 @@ export function getStatementByPeriod(year: number, month: number) {
   return prisma.statement.findUnique({ where: { year_month: { year, month } } });
 }
 
+/**
+ * Yanlış PDF yüklendiğinde geri alma yolu: ekstreyle birlikte içe aktarılmış
+ * TÜM `Transaction` satırları da siliniyor (yalnızca `statementId`'yi null'a
+ * çekmek yeterli değil — o zaman yanlış ekstrenin işlemleri "manuel" gibi
+ * DB'de kalmaya devam eder). Başka bir ekstrenin taksit devam satırları
+ * (aynı satın almanın sonraki ayki karşılığı) ayrı `Transaction` satırları
+ * olduğu için ve yalnızca bu `statementId`'ye sahip satırlar silindiği için
+ * etkilenmez. `@@unique([year, month])` guard'ı da bu satır silinince aynı
+ * dönemi tekrar yükleyebilmeyi otomatik olarak açar.
+ */
+export function deleteStatement(id: string) {
+  return prisma.$transaction([
+    prisma.transaction.deleteMany({ where: { statementId: id } }),
+    prisma.statement.delete({ where: { id } }),
+  ]);
+}
+
 export type CreateStatementTransactionInput = {
   date: Date;
   description: string;

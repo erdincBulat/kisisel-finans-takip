@@ -1,7 +1,10 @@
 import type { AccountStatement } from "@prisma/client";
-import { Landmark } from "lucide-react";
+import { Landmark, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
+import { deleteAccountStatementAction } from "@/app/income/account-actions";
 import { formatKurus } from "@/lib/money";
 import { formatMonthYear } from "@/lib/format-date";
 
@@ -44,6 +47,7 @@ export function AccountStatementsTable({ statements }: { statements: AccountStat
             <TableHead className="text-right">Dönem Sonu</TableHead>
             <TableHead>Durum</TableHead>
             <TableHead>Yüklenme Tarihi</TableHead>
+            <TableHead className="w-16" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,6 +64,19 @@ export function AccountStatementsTable({ statements }: { statements: AccountStat
                 </Badge>
               </TableCell>
               <TableCell className="text-muted-foreground">{uploadedAtFormatter.format(s.uploadedAt)}</TableCell>
+              <TableCell>
+                <ConfirmDeleteButton
+                  title="Hesap özetini sil"
+                  description={`${formatMonthYear(s.year, s.month)} hesap özetini ve bu özetten eklenen tüm gelir kayıtlarını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
+                  action={deleteAccountStatementAction.bind(null, s.id)}
+                  trigger={
+                    <Button variant="ghost" size="icon-sm">
+                      <Trash2 className="size-3.5" />
+                      <span className="sr-only">Sil</span>
+                    </Button>
+                  }
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -138,16 +138,22 @@ export function CategoryTreeView({ categories }: { categories: CategoryWithChild
             }
           />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {expenseCategories.map((category) => (
-            <CategoryGroup
-              key={category.id}
-              category={category}
-              mainMoveCandidates={expenseCategories}
-              allCategories={categories}
-            />
-          ))}
-        </div>
+        {expenseCategories.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            Henüz gider kategorisi yok. &quot;Ana Kategori&quot; ile ilk kategoriyi ekleyin.
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {expenseCategories.map((category) => (
+              <CategoryGroup
+                key={category.id}
+                category={category}
+                mainMoveCandidates={expenseCategories}
+                allCategories={categories}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="flex flex-col gap-3">
@@ -163,16 +169,22 @@ export function CategoryTreeView({ categories }: { categories: CategoryWithChild
             }
           />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {incomeCategories.map((category) => (
-            <CategoryGroup
-              key={category.id}
-              category={category}
-              mainMoveCandidates={incomeCategories}
-              allCategories={categories}
-            />
-          ))}
-        </div>
+        {incomeCategories.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            Henüz gelir kategorisi yok. &quot;Gelir Kategorisi&quot; ile ilk kategoriyi ekleyin.
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {incomeCategories.map((category) => (
+              <CategoryGroup
+                key={category.id}
+                category={category}
+                mainMoveCandidates={incomeCategories}
+                allCategories={categories}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

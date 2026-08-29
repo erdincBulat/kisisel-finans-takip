@@ -5,6 +5,7 @@ import type { ActionState } from "@/lib/action-state";
 import { formatMonthYear } from "@/lib/format-date";
 import {
   createAccountStatementWithLines,
+  deleteAccountStatement,
   getAccountStatementByPeriod,
   type CreateAccountLineInput,
 } from "@/lib/db/account-statement.service";
@@ -147,4 +148,17 @@ export async function saveAccountStatementImportAction(input: SaveAccountStateme
     status: "success",
     message: `${formatMonthYear(data.year, data.month)} hesap özeti içe aktarıldı: ${incomeCount} gelir eklendi.`,
   };
+}
+
+/** Yanlış PDF yüklendiğinde geri alma — `deleteStatementAction`'ın (statements/actions.ts) hesap özeti karşılığı. */
+export async function deleteAccountStatementAction(id: string): Promise<ActionState> {
+  try {
+    await deleteAccountStatement(id);
+  } catch (error) {
+    console.error("Hesap özeti silme başarısız:", error);
+    return { status: "error", message: "Hesap özeti silinemedi." };
+  }
+
+  revalidatePath("/income");
+  return { status: "success", message: "Hesap özeti ve ilişkili tüm gelirler silindi." };
 }

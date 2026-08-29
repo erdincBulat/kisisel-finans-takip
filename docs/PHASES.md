@@ -220,7 +220,36 @@ Kullanıcı `docs/` altına 6 aylık gerçek Enpara **hesap özeti** (vadesiz TL
 
 ---
 
-## ⬜ Faz 12 — AI (opsiyonel, en son)
+## ✅ Faz sırası dışı ek — Backlog temizliği: Ayarlar hub'ı, Merchant Kuralları, İşlemler kolon/filtre (2026-08-29, tamamlandı)
 
-- [ ] `lib/ai/provider.ts` arayüzü zaten planlanmış; `ollama.ts` / `openai.ts` bağlanacak
-- [ ] Önce "Aylık Finansal Özet", sonra "Doğal Dil Finansal Sorgular" (MVP sonrası)
+`docs/BACKLOG.md`'nin ilk 3 maddesi (2026-08-29 denetiminden) çözüldü:
+
+- [x] `/settings` artık gerçek bir hub: Kategori Yönetimi / Bütçe Yönetimi / Merchant Kuralları / Abonelikler kartları gerçek sayfalara link veriyor, henüz yapılmamış AI Ayarları / Veri Yönetimi "Yakında" rozetiyle devre dışı gösteriliyor (Faz 12 ve backlog madde 4 hâlâ bekliyor, buradan atlanmadı)
+- [x] `/settings/merchant-rules` — yeni sayfa: `lib/merchants/merchant-rule.service.ts`'e eklenen `updateMerchantRule`/`deleteMerchantRule` üzerinden var olan `MerchantRule` kayıtlarını listeleme, kategori/alt kategori düzenleme, silme. Kural oluşturma bu ekrandan yapılmıyor — o akış zaten `/transactions`'daki "Gelecekte de uygula?" toast'ında var, kapsam bilinçli olarak sadece görüntüle/düzenle/sil ile sınırlı tutuldu
+- [x] `/transactions` — tabloya ayrı bir **Merchant** kolonu eklendi (`normalizedMerchant`, Açıklama'nın yanında), filtrelere **Kaynak** (Tümü/Manuel/Ekstre) `<Select>`'i eklendi (`lib/db/transaction.service.ts`'in zaten desteklediği `source` filtresi artık UI'dan erişilebilir)
+- [x] Playwright ile gerçek tarayıcıda doğrulandı (kullanıcının gerçek verisiyle): Ayarlar hub'ı 6 kart doğru render etti, Merchant Kuralları 11 gerçek kuralı listeledi ve düzenleme diyaloğu doğru kategori/alt kategoriyle açıldı (kaydetmeden kapatıldı, DB değişmedi), İşlemler'de Kaynak filtresi "Manuel" seçilince `?source=MANUAL` ile doğru şekilde boş sonuç döndü (kullanıcının verisinde henüz manuel işlem yok) — konsolda hata yoktu
+- [x] `typecheck`/`lint`/`test` (144 test, değişmedi)/`build` yeşil
+
+---
+
+## ✅ Faz sırası dışı ek — Backlog temizliği: Veri Yönetimi, boş durumlar, ekstre silme (2026-08-29, tamamlandı)
+
+`docs/BACKLOG.md`'nin 4-6. maddeleri çözüldü:
+
+- [x] **Veri Yönetimi** (`/settings/data`, spec §42): `lib/db/backup.ts`'in `getDatabaseFilePath()`'i `DATABASE_URL`'den mutlak dosya yolunu çözer; sayfa konum/boyut/son değişiklik tarihini gösterir, "Dosyayı İndir" butonu yeni bir route handler'a (`app/settings/data/download/route.ts`) gidiyor — `.db` dosyasını `Content-Disposition: attachment` ile indiriyor (byte-byte doğrulandı). Ayarlar hub'ındaki "Yakında" rozeti kaldırıldı.
+- [x] **Sayfa seviyesinde boş durumlar**: yeni paylaşılan `components/shared/page-empty-state.tsx` — `DashboardEmptyState` bunun üzerine yeniden yazıldı (davranış aynı), `/reports` ve `/history` artık `listStatements().length === 0` olduğunda aynı desenle karşılama ekranı gösteriyor (Dashboard'daki gate'le birebir aynı koşul). `/categories`'te ise tüm sayfa değil, `CategoryTreeView`'daki gider/gelir bölümlerinin HER BİRİ kendi boş durumunu (`border-dashed` kutu, var olan Bütçe/Taksitler kalıbı) ayrı ayrı gösteriyor — kategoriler seed'den geldiği için tüm sayfa boş olma senaryosu nadir, asıl gözlemlenen boşluk bölüm bazlıydı.
+- [x] **Yanlış PDF için geri alma**: `lib/db/statement.service.ts`'e `deleteStatement`, `lib/db/account-statement.service.ts`'e `deleteAccountStatement` eklendi — ikisi de tek bir `prisma.$transaction` içinde önce ilişkili satırları (`Transaction`/`Income`), sonra ekstre kaydını siliyor (yalnızca FK'yi null'a çekmek YETERSİZ olurdu — yanlış içe aktarılan işlemler/gelirler DB'de öksüz kalırdı). `/statements` ve `/income`'daki tablolara silme kolonu eklendi (`ConfirmDeleteButton`, net bir "geri alınamaz" uyarısıyla). `@@unique([year, month])` guard'ı silme sonrası otomatik açılıyor.
+- [x] **Gerçek build hatası (typecheck/lint/test yakalamadı):** `StatementsTable`/`AccountStatementsTable` Server Component'ler (`"use client"` yok) — `action={() => deleteXAction(s.id)}` gibi bir closure'ı Client Component'e (`ConfirmDeleteButton`) prop olarak geçirmek `next build`'de "Functions cannot be passed directly to Client Components" hatasıyla patladı (yalnızca prerender aşamasında, dev sunucusunda hata vermiyordu). Çözüm: CLAUDE.md'nin zaten belgelediği `updateXAction.bind(null, id)` kalıbı — `.bind()` sonucu Next'in server action serileştirmesi tarafından özel olarak tanınıyor, çıplak closure tanınmıyor. Aynı oturumda ikinci bir build-only hata daha bulundu: `Button render={<a .../>}` (indirme linki) Base UI'nin `nativeButton` uyarısını tetikliyordu (konsol hatası, build'i patlatmıyor ama Playwright doğrulamasında yakalandı) — `nativeButton={false}` ile düzeltildi. CLAUDE.md'nin "build adımı da gerekli" kuralı bu oturumda ÜÇÜNCÜ kez somut olarak doğrulandı (bkz. Faz 8 notu).
+- [x] Playwright ile gerçek tarayıcıda kullanıcının gerçek verisiyle doğrulandı: `/settings/data` gerçek dosya yolu/boyut/tarihi gösterdi, indirilen dosya canlı `finance.db` ile byte-byte özdeşti; `/reports`/`/history` her ikisi de dolu (Ağustos 2026 seçili) render oldu; `/statements`'ta silme onay diyaloğu doğru uyarı metniyle açıldı (silme ONAYLANMADI, gerçek veri değişmedi); tüm sayfalarda konsol hatası yoktu
+- [x] `typecheck`/`lint`/`test` (144 test, değişmedi)/`build` yeşil
+
+**`docs/BACKLOG.md` kapandı (2026-08-29):** Kalan 4 madde (7-10 — hesap özeti gelirleri için toplu kategori, abonelik gecikme işareti, kategori isim çakışması, boş bütçe gözlemi) kullanıcı tarafından gereksiz bulunup yapılmadı; 7 ve 8 için başlanmış kod değişiklikleri (income bulk kategori barı, abonelik "Gecikti" rozeti) `git checkout` ile geri alındı, DB/kod bu notun öncesindeki temiz haline döndü.
+
+---
+
+## ⬜ Faz 12 — AI (kullanıcı kararıyla YAPILMAYACAK)
+
+Kullanıcı 2026-08-29'da bu fazın atlanacağını, AI'a gerek olmadığını belirtti — bekleyen bir iş değil, geriye kalan tek faz bilinçli olarak kapsam dışı bırakıldı.
+
+- [ ] ~~`lib/ai/provider.ts` arayüzü zaten planlanmış; `ollama.ts` / `openai.ts` bağlanacak~~
+- [ ] ~~Önce "Aylık Finansal Özet", sonra "Doğal Dil Finansal Sorgular" (MVP sonrası)~~

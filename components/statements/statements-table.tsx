@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { FileStack } from "lucide-react";
+import { FileStack, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
+import { deleteStatementAction } from "@/app/statements/actions";
 import { formatKurus } from "@/lib/money";
 import { formatMonthYear } from "@/lib/format-date";
 import type { StatementWithBalance } from "@/lib/db/statement.service";
@@ -46,6 +49,7 @@ export function StatementsTable({ statements }: { statements: StatementWithBalan
             <TableHead className="text-right">Dönem Sonu Borç</TableHead>
             <TableHead>Durum</TableHead>
             <TableHead>Yüklenme Tarihi</TableHead>
+            <TableHead className="w-16" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,6 +78,19 @@ export function StatementsTable({ statements }: { statements: StatementWithBalan
                 </Badge>
               </TableCell>
               <TableCell className="text-muted-foreground">{uploadedAtFormatter.format(s.uploadedAt)}</TableCell>
+              <TableCell>
+                <ConfirmDeleteButton
+                  title="Ekstreyi sil"
+                  description={`${formatMonthYear(s.year, s.month)} ekstresini ve bu ekstreyle içe aktarılan ${s.transactionCount} işlemin tamamını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
+                  action={deleteStatementAction.bind(null, s.id)}
+                  trigger={
+                    <Button variant="ghost" size="icon-sm">
+                      <Trash2 className="size-3.5" />
+                      <span className="sr-only">Sil</span>
+                    </Button>
+                  }
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

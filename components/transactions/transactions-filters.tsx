@@ -35,6 +35,7 @@ export function TransactionsFilters({ categories }: { categories: Category[] }) 
     ...Object.fromEntries(categories.map((c) => [c.id, c.name])),
   };
   const typeItems: Record<string, string> = { all: "Tüm türler", EXPENSE: "Harcama", REFUND: "İade" };
+  const sourceItems: Record<string, string> = { all: "Tüm kaynaklar", MANUAL: "Manuel", STATEMENT: "Ekstre" };
   const installmentItems: Record<string, string> = { all: "Tüm işlemler", yes: "Yalnızca taksitli" };
 
   return (
@@ -76,6 +77,21 @@ export function TransactionsFilters({ categories }: { categories: Category[] }) 
           <SelectItem value="all">Tüm türler</SelectItem>
           <SelectItem value="EXPENSE">Harcama</SelectItem>
           <SelectItem value="REFUND">İade</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select
+        items={sourceItems}
+        value={searchParams.get("source") ?? "all"}
+        onValueChange={(v) => updateParam("source", v === "all" ? null : v)}
+      >
+        <SelectTrigger className="w-36">
+          <SelectValue placeholder="Kaynak" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Tüm kaynaklar</SelectItem>
+          <SelectItem value="MANUAL">Manuel</SelectItem>
+          <SelectItem value="STATEMENT">Ekstre</SelectItem>
         </SelectContent>
       </Select>
 

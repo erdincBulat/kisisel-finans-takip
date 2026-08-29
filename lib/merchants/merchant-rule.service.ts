@@ -1,7 +1,26 @@
 import { prisma } from "@/lib/db/client";
 
 export function listMerchantRules() {
-  return prisma.merchantRule.findMany();
+  return prisma.merchantRule.findMany({
+    include: { category: true, subCategory: true },
+    orderBy: { normalizedMerchant: "asc" },
+  });
+}
+
+export type UpdateMerchantRuleInput = {
+  categoryId: string;
+  subCategoryId: string | null;
+};
+
+export function updateMerchantRule(id: string, input: UpdateMerchantRuleInput) {
+  return prisma.merchantRule.update({
+    where: { id },
+    data: { categoryId: input.categoryId, subCategoryId: input.subCategoryId },
+  });
+}
+
+export function deleteMerchantRule(id: string) {
+  return prisma.merchantRule.delete({ where: { id } });
 }
 
 export type UpsertMerchantRuleInput = {

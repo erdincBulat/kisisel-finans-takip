@@ -5,6 +5,7 @@ import type { ActionState } from "@/lib/action-state";
 import { formatMonthYear } from "@/lib/format-date";
 import {
   createStatementWithTransactions,
+  deleteStatement,
   getStatementByPeriod,
   type CreateStatementTransactionInput,
 } from "@/lib/db/statement.service";
@@ -155,4 +156,26 @@ export async function saveStatementImportAction(input: SaveStatementImportInput)
     status: "success",
     message: `${formatMonthYear(data.year, data.month)} ekstresi içe aktarıldı: ${data.transactions.length} işlem eklendi.`,
   };
+}
+
+/**
+ * Yanlış PDF yüklendiğinde geri alma (spec dışı, kullanıcı isteği): ekstreyi
+ * ve içe aktarılan tüm işlemlerini birlikte siler — `deleteStatement`
+ * (statement.service.ts) bkz. `@@unique([year, month])` guard'ı da böylece
+ * açılıp aynı dönem tekrar yüklenebilir hâle gelir.
+ */
+export async function deleteStatementAction(id: string): Promise<ActionState> {
+  try {
+    await deleteStatement(id);
+  } catch (error) {
+    console.error("Ekstre silme başarısız:", error);
+    return { status: "error", message: "Ekstre silinemedi." };
+  }
+
+  revalidatePath("/statements");
+  revalidatePath("/transactions");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
+  revalidatePath("/history");
+  return { status: "success", message: "Ekstre ve ilişkili tüm işlemler silindi." };
 }
