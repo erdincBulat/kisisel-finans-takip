@@ -40,28 +40,35 @@ export async function getSubscriptionCandidates(): Promise<SubscriptionCandidate
  * Artık desene uymayan eski kayıtlar SİLİNMEZ (kullanıcı zaten onaylamış
  * olabilir, geçmiş veri kaybolmasın) — yalnızca bir sonraki senkronda
  * güncellenmeyi bırakırlar.
+ *
+ * `/subscriptions`'a her ziyarette çalıştığı için (spec §56, N+1 yerine
+ * aggregate/paralel sorgu tercih edilmeli) yazmalar `Promise.all` ile paralel
+ * yürütülür — merchant başına sırayla `await` etmek, tespit edilen abonelik
+ * sayısı arttıkça sayfa yüklemesini doğrusal olarak yavaşlatırdı.
  */
 export async function syncSubscriptions(): Promise<void> {
-  const candidates = await getSubscriptionCandidates();
-  const existing = await prisma.subscription.findMany({ select: { id: true, merchant: true } });
+  const [candidates, existing] = await Promise.all([
+    getSubscriptionCandidates(),
+    prisma.subscription.findMany({ select: { id: true, merchant: true } }),
+  ]);
   const existingByMerchant = new Map(existing.map((s) => [s.merchant, s.id]));
 
-  for (const candidate of candidates) {
-    const existingId = existingByMerchant.get(candidate.merchant);
-    const data = {
-      averageAmount: candidate.averageAmount,
-      frequency: candidate.frequency,
-      lastChargeDate: candidate.lastChargeDate,
-      nextExpectedDate: candidate.nextExpectedDate,
-      categoryId: candidate.categoryId,
-    };
+  await Promise.all(
+    candidates.map((candidate) => {
+      const existingId = existingByMerchant.get(candidate.merchant);
+      const data = {
+        averageAmount: candidate.averageAmount,
+        frequency: candidate.frequency,
+        lastChargeDate: candidate.lastChargeDate,
+        nextExpectedDate: candidate.nextExpectedDate,
+        categoryId: candidate.categoryId,
+      };
 
-    if (existingId) {
-      await prisma.subscription.update({ where: { id: existingId }, data });
-    } else {
-      await prisma.subscription.create({ data: { merchant: candidate.merchant, ...data } });
-    }
-  }
+      return existingId
+        ? prisma.subscription.update({ where: { id: existingId }, data })
+        : prisma.subscription.create({ data: { merchant: candidate.merchant, ...data } });
+    }),
+  );
 }
 
 export type SubscriptionWithCategory = Subscription & { category: Category | null };
@@ -167,6 +174,16 @@ export function getMonthlyRecurringTotal(items: { frequency: Subscription["frequ
  * yüzden `Subscription.averageAmount` tek başına yanıltıcı, gerçek o ayki
  * işlem tutarı kullanılmalı). Aynı merchant'a o ay birden fazla işlem
  * düşerse (nadir ama mümkün) toplanır.
+ *
+ * `installmentTotal: null` filtresi kasıtlı: abonelik adayları zaten yalnızca
+ * taksitli OLMAYAN işlemlerden türetiliyor (bkz. `getSubscriptionCandidateRows`),
+ * ama bu sorgu merchant ADINA göre TÜM işlemlerle yeniden eşleşiyor — bu filtre
+ * olmadan, aynı `normalizedMerchant`'ı paylaşan taksitli bir alım (örn. aynı
+ * markadan tek seferlik taksitli bir ürün) yanlışlıkla bu aya sızabilirdi. Bu
+ * filtreyle birlikte ham `date` aralığı zaten doğru ay demektir — taksitli
+ * olmayan bir işlemin efektif ayı her zaman `Transaction.date`'in ayıdır (bkz.
+ * `lib/db/transaction.service.ts`'teki `getEffectiveMonth`), yani ayrıca
+ * `transactionMonthFilter`'a geçmeye gerek yok.
  */
 async function getActualMonthlyAmounts(
   merchants: string[],
@@ -180,6 +197,7 @@ async function getActualMonthlyAmounts(
     where: {
       normalizedMerchant: { in: merchants },
       type: "EXPENSE",
+      installmentTotal: null,
       date: { gte: new Date(Date.UTC(year, month - 1, 1)), lt: new Date(Date.UTC(year, month, 1)) },
     },
     _sum: { amount: true },

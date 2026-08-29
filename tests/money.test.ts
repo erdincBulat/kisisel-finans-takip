@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTLToKurus, kurusToTL, formatKurus } from "@/lib/money";
+import { parseTLToKurus, kurusToTL, formatKurus, kurusToTLInput } from "@/lib/money";
 
 describe("parseTLToKurus", () => {
   it("binlik ayraçlı ve virgüllü Türkçe tutarı doğru kuruşa çevirir", () => {
@@ -29,5 +29,15 @@ describe("kurusToTL / formatKurus", () => {
 
   it("tr-TR para birimi formatında gösterir", () => {
     expect(formatKurus(125050)).toContain("1.250,50");
+  });
+});
+
+describe("kurusToTLInput", () => {
+  it("form input alanı için ₺ sembolü/binlik ayraç olmadan virgüllü tutar üretir", () => {
+    expect(kurusToTLInput(125050)).toBe("1250,50");
+  });
+
+  it("parseTLToKurus ile geri okunabilir (round-trip)", () => {
+    expect(parseTLToKurus(kurusToTLInput(2511681))).toBe(2511681);
   });
 });

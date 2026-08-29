@@ -3,10 +3,19 @@ import { transactionMonthFilter } from "@/lib/db/transaction.service";
 
 export type TopMerchant = { merchant: string; amount: number; count: number };
 
-/** Seçili ayda en çok harcama yapılan merchant'lar (spec §55), net (EXPENSE-REFUND). */
+/**
+ * Seçili ayda en çok harcama yapılan merchant'lar (spec §55), net (EXPENSE-REFUND).
+ * Banka ücreti/faiz satırları (alt kategori "Bankacılık") hariç tutulur — bunlar
+ * gerçek bir merchant değil, bakiyeye göre değişen tahakkuklardır; aynı dışlama
+ * `lib/subscriptions/subscription.service.ts`'in aday sorgusunda da kullanılıyor.
+ */
 export async function getTopMerchants(year: number, month: number, limit = 10): Promise<TopMerchant[]> {
   const transactions = await prisma.transaction.findMany({
-    where: { ...transactionMonthFilter(year, month), type: { in: ["EXPENSE", "REFUND"] } },
+    where: {
+      ...transactionMonthFilter(year, month),
+      type: { in: ["EXPENSE", "REFUND"] },
+      NOT: { subCategory: { name: "Bankacılık" } },
+    },
     select: { amount: true, type: true, normalizedMerchant: true },
   });
 

@@ -6,10 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A local-only, single-user personal finance tracker (Turkish). Core loop: upload an Enpara credit card statement PDF → parse it → auto-categorize transactions → user reviews/corrects → dashboard/analytics. No auth, no multi-user, no cloud — everything runs on `localhost` against a local SQLite file.
 
-Two documents drive all product/architecture decisions and must be consulted before making non-trivial changes:
+Three documents drive all product/architecture decisions and must be consulted before making non-trivial changes:
 
 - **`PROJECT_SPEC.md`** — the full 74-section requirements spec (Turkish). Contains the exact business rules (duplicate-import logic, category priority order, installment math, subscription-detection heuristics, MVP scope boundaries, etc.). When a feature's exact behavior is ambiguous, this is the source of truth.
 - **`docs/PHASES.md`** — the living phase-by-phase build tracker (Faz 1–12). Check this first to see what's already built vs. still a placeholder, and read it before starting the next phase — each phase's checklist and "known issues" notes carry context that isn't repeated here.
+- **`docs/BACKLOG.md`** — tracked findings from ad-hoc audits/reviews that aren't tied to a specific Faz (spec-compliance gaps, code-quality issues, product opportunities noticed in real data). Created 2026-08-29 after the first full-app audit. Check this too, separately from PHASES.md — an item only moves out of it once actually fixed (delete the entry, optionally add a one-line note to PHASES.md if it's substantial enough to warrant one).
 
 This project is built incrementally, one "Faz" (phase) at a time, per the user's explicit request — do not jump ahead to a later phase's features without being asked.
 

@@ -9,7 +9,7 @@ import { ProgressTrack, ProgressIndicator } from "@/components/ui/progress";
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { BudgetFormDialog } from "./budget-form-dialog";
 import { deleteBudgetAction } from "@/app/budgets/actions";
-import { formatKurus } from "@/lib/money";
+import { formatKurus, kurusToTLInput } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type { BudgetWithProgress } from "@/lib/db/budget.service";
 
@@ -67,7 +67,7 @@ export function BudgetsList({
                   id: b.id,
                   categoryId: b.categoryId,
                   subCategoryId: b.subCategoryId,
-                  limitAmountTL: (b.limitAmount / 100).toFixed(2).replace(".", ","),
+                  limitAmountTL: kurusToTLInput(b.limitAmount),
                 }}
                 trigger={
                   <Button variant="ghost" size="icon-sm">

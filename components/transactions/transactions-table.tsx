@@ -18,7 +18,7 @@ import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { TransactionFormDialog } from "./transaction-form-dialog";
 import { BulkCategoryBar } from "./bulk-category-bar";
 import { deleteTransactionAction } from "@/app/transactions/actions";
-import { formatKurus } from "@/lib/money";
+import { formatKurus, kurusToTLInput } from "@/lib/money";
 
 type CategoryWithChildren = Category & { children: Category[] };
 type TransactionRow = Transaction & { category: Category | null; subCategory: Category | null };
@@ -135,7 +135,7 @@ export function TransactionsTable({
                         date: tx.date.toISOString().slice(0, 10),
                         description: tx.description,
                         normalizedMerchant: tx.normalizedMerchant,
-                        amountTL: (tx.amount / 100).toFixed(2).replace(".", ","),
+                        amountTL: kurusToTLInput(tx.amount),
                         type: tx.type === "REFUND" ? "REFUND" : "EXPENSE",
                         categoryId: tx.categoryId,
                         subCategoryId: tx.subCategoryId,

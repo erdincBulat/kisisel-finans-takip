@@ -15,7 +15,7 @@ import {
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { IncomeFormDialog } from "./income-form-dialog";
 import { deleteIncomeAction } from "@/app/income/actions";
-import { formatKurus } from "@/lib/money";
+import { formatKurus, kurusToTLInput } from "@/lib/money";
 
 type IncomeRow = Income & { category: Category | null };
 
@@ -71,7 +71,7 @@ export function IncomeTable({ incomes, categories }: { incomes: IncomeRow[]; cat
                       id: income.id,
                       date: income.date.toISOString().slice(0, 10),
                       description: income.description,
-                      amountTL: (income.amount / 100).toFixed(2).replace(".", ","),
+                      amountTL: kurusToTLInput(income.amount),
                       categoryId: income.categoryId,
                       notes: income.notes,
                     }}

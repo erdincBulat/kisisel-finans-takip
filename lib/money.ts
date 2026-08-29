@@ -25,11 +25,6 @@ export function kurusToTL(kurus: number): number {
   return kurus / 100;
 }
 
-/** TL'yi kuruşa çevirir (form girişleri için). */
-export function tlToKurus(tl: number): number {
-  return Math.round(tl * 100);
-}
-
 const formatter = new Intl.NumberFormat("tr-TR", {
   style: "currency",
   currency: "TRY",
@@ -42,6 +37,7 @@ export function formatKurus(kurus: number): string {
   return formatter.format(kurusToTL(kurus));
 }
 
-export function addKurus(...values: number[]): number {
-  return values.reduce((sum, v) => sum + v, 0);
+/** Kuruşu form input alanlarının `defaultValue`'su için "1250,50" biçiminde döndürür (₺ sembolü/binlik ayraç yok — `parseTLToKurus` bunu geri okuyabilir). */
+export function kurusToTLInput(kurus: number): string {
+  return kurusToTL(kurus).toFixed(2).replace(".", ",");
 }
