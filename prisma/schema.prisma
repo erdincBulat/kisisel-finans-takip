@@ -1,0 +1,238 @@
+// Kişisel Finans Takip Uygulaması — Prisma şeması
+// Referans: mimari plan / DATABASE DESIGN bölümü.
+// Para alanları kuruş cinsinden Int olarak tutulur (bkz. lib/money.ts) —
+// JavaScript floating point hatalarından kaçınmak için (spec §50).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+  REFUND
+  PAYMENT // kredi kartı ödeme satırları (örn. "Ödeme - Enpara.com Cep Şubesi") —
+          // harcama/gelir toplamlarına dahil edilmez, sadece geçmiş/mutabakatta görünür.
+}
+
+enum TransactionSource {
+  STATEMENT
+  MANUAL
+}
+
+enum StatementStatus {
+  PENDING
+  IMPORTED
+  FAILED
+}
+
+enum InstallmentStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum SubscriptionFrequency {
+  MONTHLY
+  YEARLY
+  UNKNOWN
+}
+
+model Category {
+  id       String  @id @default(cuid())
+  name     String
+  color    String
+  isIncome Boolean @default(false)
+
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+
+  transactionsAsMain Transaction[] @relation("TransactionCategory")
+  transactionsAsSub  Transaction[] @relation("TransactionSubCategory")
+
+  merchantRulesAsMain MerchantRule[] @relation("MerchantRuleCategory")
+  merchantRulesAsSub  MerchantRule[] @relation("MerchantRuleSubCategory")
+
+  subscriptions Subscription[]
+
+  budgetsAsMain Budget[] @relation("BudgetCategory")
+  budgetsAsSub  Budget[] @relation("BudgetSubCategory")
+
+  incomes Income[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Statement {
+  id                String           @id @default(cuid())
+  year              Int
+  month             Int
+  statementDate     DateTime // PDF üzerindeki "Ekstre tarihi"
+  periodStart       DateTime // tahmini — bkz. RISKS: PDF üzerinde açıkça yazmıyor
+  periodEnd         DateTime
+  fileName          String
+  uploadedAt        DateTime         @default(now())
+  transactionCount  Int              @default(0)
+  totalAmount       Int              @default(0) // kuruş
+  previousBalance   Int? // kuruş — header mutabakat kontrolü için
+  status            StatementStatus  @default(PENDING)
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([year, month])
+}
+
+model Transaction {
+  id                 String            @id @default(cuid())
+  date               DateTime
+  description        String // PDF'den gelen orijinal metin (korunur)
+  normalizedMerchant String
+  amount             Int // kuruş, her zaman pozitif; işaret `type` ile belirlenir
+  type               TransactionType
+  source             TransactionSource
+
+  categoryId    String?
+  category      Category? @relation("TransactionCategory", fields: [categoryId], references: [id])
+  subCategoryId String?
+  subCategory   Category? @relation("TransactionSubCategory", fields: [subCategoryId], references: [id])
+
+  installmentCurrent Int?
+  installmentTotal   Int?
+  installment        Installment?
+
+  statementId String?
+  statement   Statement? @relation(fields: [statementId], references: [id])
+
+  fingerprint String // date+normalizedMerchant+amount+installment hash (spec §49)
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([normalizedMerchant])
+  @@index([statementId])
+}
+
+model MerchantRule {
+  id                 String  @id @default(cuid())
+  merchantPattern    String
+  normalizedMerchant String
+
+  categoryId    String
+  category      Category @relation("MerchantRuleCategory", fields: [categoryId], references: [id])
+  subCategoryId String?
+  subCategory   Category? @relation("MerchantRuleSubCategory", fields: [subCategoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([merchantPattern])
+}
+
+model Installment {
+  id                 String             @id @default(cuid())
+  transactionId      String             @unique
+  transaction        Transaction        @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  currentInstallment Int
+  totalInstallments  Int
+  installmentAmount  Int // kuruş
+  startDate          DateTime
+  endDate            DateTime
+  status             InstallmentStatus  @default(ACTIVE)
+  // Gelecek taksitler burada AYRI bir Transaction olarak değil, bu kayıttan
+  // hesaplanan projeksiyon olarak (lib/installments/schedule.ts) üretilir.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id               String                 @id @default(cuid())
+  merchant         String
+  averageAmount    Int // kuruş
+  frequency        SubscriptionFrequency  @default(UNKNOWN)
+  lastChargeDate   DateTime
+  nextExpectedDate DateTime
+  categoryId       String?
+  category         Category?              @relation(fields: [categoryId], references: [id])
+  active           Boolean                @default(true)
+  confirmed        Boolean                @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Budget {
+  id            String   @id @default(cuid())
+  categoryId    String
+  category      Category @relation("BudgetCategory", fields: [categoryId], references: [id])
+  subCategoryId String?
+  subCategory   Category? @relation("BudgetSubCategory", fields: [subCategoryId], references: [id])
+  limitAmount   Int // kuruş
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Income {
+  id          String    @id @default(cuid())
+  date        DateTime
+  description String
+  amount      Int // kuruş
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  notes       String?
+
+  accountStatementId String?
+  accountStatement   AccountStatement? @relation(fields: [accountStatementId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * Enpara vadesiz TL hesap özeti (kredi kartı ekstresinden AYRI bir PDF türü)
+ * — hesaba giren para hareketlerini (gelen transferler) içe aktarmak için.
+ * Yalnızca GELİR takip edilir (kullanıcı kararı): her satır önizlemede
+ * Gelir/Hariç Tut olarak sınıflandırılır, Gelir -> Income satırı, Hariç Tut
+ * (giden hareketlerin TAMAMI: EFT, Encard harcaması, ATM, kendi hesaplar
+ * arası transfer, kredi kartı ödemesi, ...) hiç kaydedilmez — `Transaction`
+ * tablosuna HİÇBİR ZAMAN yazılmaz, böylece /transactions ve dashboard'un
+ * harcama tarafı bu veriden tamamen bağımsız kalır.
+ */
+model AccountStatement {
+  id             String          @id @default(cuid())
+  year           Int
+  month          Int
+  statementDate  DateTime
+  periodStart    DateTime
+  periodEnd      DateTime
+  iban           String?
+  fileName       String
+  uploadedAt     DateTime        @default(now())
+  openingBalance Int // kuruş — dönem başı bakiyesi
+  closingBalance Int // kuruş — dönem sonu bakiyesi
+  lineCount      Int             @default(0) // PDF'deki toplam satır sayısı (hariç tutulanlar dahil)
+  status         StatementStatus @default(PENDING)
+
+  incomes Income[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([year, month])
+}
+
+model Setting {
+  key   String @id
+  value String
+}

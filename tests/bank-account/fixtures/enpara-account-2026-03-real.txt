@@ -1,0 +1,63 @@
+Enpara.com’daki tüm hesaplarınızın 31/03/2026 gün sonu itibarıyla özeti aşağıda bulunmaktadır.
+TC kimlik numarası 1234567****	Ad soyad Ahmet Yıldız
+Tarih 31/03/2026
+Hesap adı/tipi Vade ve faiz oranı* Vade sonu Bakiye Bakiye (TL karşılığı**)
+Vadesiz TL - - 20.168,82 TL 20.168,82 TL
+Toplam 20.168,82 TL
+* Yıllık brüt faiz oranlarıdır.
+** Bakiyelerin TL karşılıkları, ilgili günün kapanışındaki Enpara.com alış ve satış fiyatlarının ortalamasından Türk Lirası’na çevrilerek hesaplanmıştır.
+Enpara.com Vadesiz TL hesabınızın Mart - 2026 dönemindeki hareketlerinin detayı aşağıda bulunmaktadır.
+TC kimlik numarası
+IBAN
+Ad soyad Ekstre dönemi
+Dönem başı bakiyesi
+Dönem sonu bakiyesi	TR12 3456 7890 1234 5678 9012 34 20.168,82 TL
+15.255,83 TL
+01/03/2026 - 31/03/2026
+1234567****
+Ahmet Yıldız
+Tarih Açıklama Tutar Bakiye
+01/03/26 Gelen Transfer, AHMET YILDIZ, Bireysel Ödeme 8.000,00 TL 23.255,83 TL
+02/03/26 Giden Transfer, Zeynep Kaya, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4344466477 - 2.000,00 TL 21.255,83 TL
+03/03/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4346825553 - 2.000,00 TL 19.255,83 TL
+03/03/26 Giden Transfer, Zeynep Kaya, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4346843547 - 2.500,00 TL 16.755,83 TL
+04/03/26 Diğer, Ayin Enparalisi oldugunuz icin Netflix, Spotify ve
+Youtube Premium kampanyasindan kazandiginiz iade 79,99 TL 16.835,82 TL
+05/03/26 Gelen Transfer, CANER AYDIN, Kardeşime harçlık 10.000,00 TL 26.835,82 TL
+06/03/26 Giden Transfer, Örnek Menkul Değerler Anonim Şirketi,
+5R6MBWYZUL - 10.000,00 TL 16.835,82 TL
+11/03/26 Gelen Transfer, ONUR ÇELİK, BDT Eğitimi 1.Taksit 5.625,00 TL 22.460,82 TL
+11/03/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4368357270 - 5.500,00 TL 16.960,82 TL
+11/03/26 Ödeme, Enpara.com kredi kartı ödemesi, Ahmet Yıldız - 10.000,00 TL 6.960,82 TL
+13/03/26 Gelen Transfer, DENİZ AKSOY, DENİZ AKSOY
+tarafından aktarılan 5.000,00 TL 11.960,82 TL
+14/03/26 Giden Transfer, Serkan Güneş, envato ücreti, EFT
+(FAST) sorgu no: 4374302541 - 100,00 TL 11.860,82 TL
+18/03/26 Gelen Transfer, DENİZ AKSOY, DENİZ AKSOY
+tarafından aktarılan 5.000,00 TL 16.860,82 TL
+20/03/26 Gelen Transfer, KEREM POLAT, Bireysel Ödeme 10.000,00 TL 26.860,82 TL
+2	1	Sayfa /
+Enpara Bank A.Ş. Büyük Mükellefler V.D. 3350917589 Seri / Sıra No : 03663 / ENBK / 00000000003929
+Enpara Bank A.Ş. | Esentepe Mah. Büyükdere Cad. No:215 34394 Şişli / İstanbul | Ticaret sicil no: 494129-5 | Mersis No: 0335-0917-5890-0001
+
+-- 1 of 2 --
+
+Tarih Açıklama Tutar Bakiye
+22/03/26 Giden Transfer, Caner Aydın, Bireysel Ödeme, EFT
+(FAST) sorgu no: 4394816206 - 1.500,00 TL 25.360,82 TL
+22/03/26 Giden Transfer, Örnek Eğitim Danışmanlık Denetim İletişim
+Org. Ve Sağlık Hiz. A. Ş., dae757ab64177 Ahmet Yıldız,
+EFT (FAST) sorgu no: 4394865715
+- 3.192,00 TL 22.168,82 TL
+23/03/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4397266742 - 2.000,00 TL 20.168,82 TL
+2	2	Sayfa /
+Enpara Bank A.Ş. Büyük Mükellefler V.D. 3350917589 Seri / Sıra No : 03663 / ENBK / 00000000003929
+Enpara Bank A.Ş. | Esentepe Mah. Büyükdere Cad. No:215 34394 Şişli / İstanbul | Ticaret sicil no: 494129-5 | Mersis No: 0335-0917-5890-0001
+
+-- 2 of 2 --
+

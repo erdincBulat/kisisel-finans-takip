@@ -1,0 +1,19 @@
+Ekstre tarihi 05/03/2027
+Ekstre borcu 2.140,00 TL
+Minimum ödeme tutarı 500,00 TL
+Son ödeme tarihi 17/03/2027
+Ad soyad Test Kullanıcı
+Kart numarası 4111 11** **** 1111
+Kart limiti 25.000,00 TL
+Kullanılabilir kart limiti 22.860,00 TL
+Bir önceki
+ekstre borcu - Ödemeler + Harcamalar ve
+yansıyan taksitler + Nakit avans / Artı
+bakiye transferi + Faiz, vergiler,
+ücretler ve diğer = Ekstre borcu
+1.000,00 TL 0,00 TL 1.140,00 TL 0,00 TL 0,00 TL 2.140,00 TL
+İşlem tarihi Açıklama Taksit Tutar
+Bir önceki ekstre bakiyeniz 1.000,00 TL
+15/02/2027 Apple Store 3/6 1.000,00 TL
+16/02/2027 MERVE MARKET 140,00 TL
+Bir sonraki ekstrenizin tarihi 05/04/2027, son ödeme tarihi ise 15/04/2027'dır.

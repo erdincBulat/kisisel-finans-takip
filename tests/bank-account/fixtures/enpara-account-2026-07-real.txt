@@ -1,0 +1,73 @@
+Enpara'daki tüm hesaplarınızın 31/07/2026 gün sonu itibarıyla özeti aşağıda bulunmaktadır.
+TC kimlik numarası 1234567****	Ad soyad Ahmet Yıldız
+Tarih 31/07/2026
+Hesap adı/tipi Vade ve faiz oranı* Vade sonu Bakiye Bakiye (TL karşılığı**)
+Vadesiz TL - - 4.464,82 TL 4.464,82 TL
+Toplam 4.464,82 TL
+* Yıllık brüt faiz oranlarıdır.
+** Bakiyelerin TL karşılıkları, ilgili günün kapanışındaki Enpara alış ve satış fiyatlarının ortalamasından Türk Lirası’na çevrilerek hesaplanmıştır.
+Vadesiz TL hesabınızın Temmuz - 2026 dönemindeki hareketlerinin detayı aşağıda bulunmaktadır.
+TC kimlik numarası
+IBAN
+Ad soyad Ekstre dönemi
+Dönem başı bakiyesi
+Dönem sonu bakiyesi	TR12 3456 7890 1234 5678 9012 34 4.464,82 TL
+21.975,82 TL
+01/07/2026 - 31/07/2026
+1234567****
+Ahmet Yıldız
+Tarih Açıklama Tutar Bakiye
+01/07/26 Gelen Transfer, CANER AYDIN, Bireysel Ödeme 11.000,00 TL 32.975,82 TL
+01/07/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4637164455 - 3.000,00 TL 29.975,82 TL
+01/07/26 Giden Transfer, Zeynep Kaya, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4637168460 - 5.500,00 TL 24.475,82 TL
+02/07/26 Gelen Transfer, BURAK DEMİR, . 50.000,00 TL 74.475,82 TL
+02/07/26 Giden Transfer, Örnek Tasarruf Finansmanı A.Ş.,
+3144153 Ahmet Yıldız, EFT (FAST) sorgu no: 4640638051 - 40.000,00 TL 34.475,82 TL
+03/07/26 Giden Transfer, Burak Demir, Bireysel Ödeme, EFT
+(FAST) sorgu no: 4643699031 - 10.000,00 TL 24.475,82 TL
+05/07/26 Gelen Transfer, CANER AYDIN, Bireysel Ödeme 10.000,00 TL 34.475,82 TL
+06/07/26 Giden Transfer, Zeynep Kaya, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4650309738 - 10.000,00 TL 24.475,82 TL
+09/07/26 Ödeme, Enpara.com kredi kartı ödemesi, Ahmet Yıldız - 15.000,00 TL 9.475,82 TL
+13/07/26 Giden Transfer, Örnek Menkul Değerler Anonim Şirketi,
+5R6MBWYZUL - 3.000,00 TL 6.475,82 TL
+15/07/26 Para Çekme, QNB ATM'sinden para çekme - 1.000,00 TL 5.475,82 TL
+17/07/26 Gelen Transfer, ELİF ŞAHİN, ELİF ŞAHİN
+tarafından aktarılan 2.500,00 TL 7.975,82 TL
+21/07/26 Gelen Transfer, CANER AYDIN, KARDEŞİME
+HARÇLIK 3.000,00 TL 10.975,82 TL
+21/07/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4686417961 - 1.000,00 TL 9.975,82 TL
+2	1	Sayfa /
+Enpara Bank A.Ş. Büyük Mükellefler V.D. 3350917589 Seri / Sıra No : 03663 / ENBK / 00000000003929
+Enpara Bank A.Ş. | Esentepe Mah. Büyükdere Cad. No:215 34394 Şişli / İstanbul | Ticaret sicil no: 494129-5 | Mersis No: 0335-0917-5890-0001
+
+-- 1 of 2 --
+
+Tarih Açıklama Tutar Bakiye
+21/07/26 Giden Transfer, Zeynep Kaya, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4686419985 - 2.000,00 TL 7.975,82 TL
+23/07/26 Gelen Transfer, CANER AYDIN, KARDEŞİME
+HARÇLIK 12.000,00 TL 19.975,82 TL
+23/07/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4690466042 - 6.000,00 TL 13.975,82 TL
+23/07/26 Giden Transfer, Zeynep Kaya, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4690477927 - 6.000,00 TL 7.975,82 TL
+26/07/26 Giden Transfer, Serkan Güneş, envato ücreti, EFT
+(FAST) sorgu no: 4697094624 - 100,00 TL 7.875,82 TL
+27/07/26 Giden Transfer, Ahmet Yıldız, Bireysel Ödeme, EFT (FAST)
+sorgu no: 4699209535 - 1.500,00 TL 6.375,82 TL
+29/07/26 Encard Harcaması, 000000000000000-
+HEPSIPAY/HEPSIBURADA ISTANBUL TR Pos satış - 1.606,00 TL 4.769,82 TL
+31/07/26 Encard Harcaması, 000000000000000-
+HEPSIPAY/HEPSIBURADA ISTANBUL TR Pos satış - 305,00 TL 4.464,82 TL
+04/09/2026 tarihinden itibaren şans oyunu ödemelerinde her ay ilk 3 işleminizi ücretsiz olarak, 4. ve
+sonrasındaki işlemlerinizi ise işlem başına 18,90 TL (BSMV dahil) ücret ödeyerek gerçekleştirebilirsiniz.
+2	2	Sayfa /
+Enpara Bank A.Ş. Büyük Mükellefler V.D. 3350917589 Seri / Sıra No : 03663 / ENBK / 00000000003929
+Enpara Bank A.Ş. | Esentepe Mah. Büyükdere Cad. No:215 34394 Şişli / İstanbul | Ticaret sicil no: 494129-5 | Mersis No: 0335-0917-5890-0001
+
+-- 2 of 2 --
+
